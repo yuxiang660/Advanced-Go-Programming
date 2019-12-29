@@ -145,3 +145,10 @@ type runtime.Error interface {
 * `sync.Mutex`：[lock-mutex](./code/lock/mutex.go)
 * `atomic`: [lock-atomic](./code/lock/atomic.go)
 * `sync.Once`：[lock-singleton](./code/lock/singleton.go)
+### 1.5.3 顺序一致性内存模型
+* 两个Goroutine之间，一个Goroutine不能知道另一个Goroutine的内部执行顺序，甚至一直不能看到对共享资源的改动（可能始终在寄存器中），直到另一个Goroutine结束。
+### 1.5.6 基于Channel的通信
+* 对Channel的发送和接收通常发生在不同的Goroutine上，在同一个Goroutine上执行2个操作很容易导致死锁。
+* 无缓冲的Channel上的发送操作总在对应的接收操作完成前发生：[unbuffered-channel](./code/channel/unbuffered-channel.go)
+* 对于带缓冲的Channel，第K个接收完成操作发生在第K+C个发送完成之前，其中C是Channel的缓存大小。对于从无缓冲Channel进行的接收，发生在对该Channel进行的发送**完成**之前。对于从无缓冲Channel进行的接收**完成**，发生在对该Channel进行的发送完成之后。
+* `select{}`是一个空的管道选择语句，会导致线程阻塞。
