@@ -107,4 +107,32 @@ func Swap(a, b int) (int, int) {
 // func CloseFile(f *File) error
 var CloseFile = (*File).Close
 ```
-* Go语言通过结构体内置匿名成员来实现继承：[method-inherit](./code/method/inherit.go)
+* Go语言的继承
+    - 通过结构体内置匿名成员来继承匿名成员的内部成员和对应方法：[method-inherit](./code/method/inherit.go)
+    - `childType.parentVar`会在编译时被展开为`childType.parentType.parentVar`
+    - `C++`子类方法是在运行时动态绑定到对象的，因此基类实现的某些方法看到的`this`可能不是基类类型对应的对象，这个特性会导致基类方法运行的不确定性。Go语言通过嵌入匿名的成员来“继承”基类的方法，`this`就是实现该方法的类型的对象。但是这样的方法并不能实现`C++`中虚函数的多态特性。如果需要虚函数的多态特性，我们需要借助Go语言接口来实现。
+
+### 1.4.3 接口
+* 接口类型实现了对鸭子类型的支持
+* 利用`fmt.Printf`的接口参数，实现大写输出：<br>
+    - [interface-upper-writer](./code/interface/upper-writer.go)
+    - [interface-upper-string](./code/interface/upper-string.go)
+* 接口的显式转换与隐式转换：[interface-conversion](./code/interface/conversion.go)
+    - 非接口类型（如`int`型）不支持隐式转换，必须显示转换，如：
+    > `var numInt64 = (int64)(numInt)`
+    - 接口和对象，接口和接口之间的转换支持隐式转换
+* 内置接口
+```go
+type error interface {
+    //只要实现了Error()函数，返回值为String的都实现了error接口
+    Error() String
+}
+```
+* 接口“继承”接口
+```go
+type runtime.Error interface {
+    error
+    // 既需要实现上面的Error()函数，也需要实现RuntimeError()函数，才实现了runtime.Error接口
+    RuntimeError()
+}
+```
