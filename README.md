@@ -136,3 +136,12 @@ type runtime.Error interface {
     RuntimeError()
 }
 ```
+
+## 1.5 面向并发的内存模型
+* 与Erlang不同，Go语言的Goroutine之间是共享内存的
+### 1.5.1 Goroutine和系统线程
+* goroutine和系统线程不是等价的
+### 1.5.2 原子操作
+* `sync.Mutex`：[lock-mutex](./code/lock/mutex.go)
+* `atomic`: [lock-atomic](./code/lock/atomic.go)
+* `sync.Once`：[lock-singleton](./code/lock/singleton.go)
