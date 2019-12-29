@@ -17,10 +17,10 @@
 ### 1.3.2 字符串
 * 只读
 * 赋值时只复制了地址和长度
-* 底层结构`reflect.StringHeader`: [string-len.go](./code/string/len.go)
+* 底层头部结构`reflect.StringHeader`: [string-len.go](./code/string/len.go)
 ```go
 type StringHeader struct {
-    Data unitptr
+    Data uintptr
     Len int
 }
 ```
@@ -37,3 +37,15 @@ type StringHeader struct {
 ### 1.3.3 切片
 * 头部含有底层数据指针和容量信息
 * 赋值或传参时只赋值头部信息（注意这也时按值（头部的值）传递）
+* 长度不是类型的组成部分，是简化版的动态数组
+* 底层头部结构`reflect.SliceHeader`:
+```go
+type SliceHeader struct {
+    Data uintptr
+    Len int
+    Cap int
+}
+```
+* 定义：[slice-defination](./code/slice/defination.go)
+* 追加切片元素：[slice-append](./code/slice/append.go)
+
