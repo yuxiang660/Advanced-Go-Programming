@@ -32,6 +32,7 @@ type StringHeader struct {
     - 单引号表示`rune`类型
     - 双引号表示`string`类型
     - 反引号用来创建原生的字符串字面量，不支持任何转义序列
+* `string`、`[]byte`和`[]rune`之间的转换：[string-bytes-transition](./code/string/string-bytes-runes-transition.go)
 
 ### 1.3.3 切片
 * 头部含有底层数据指针和容量信息
