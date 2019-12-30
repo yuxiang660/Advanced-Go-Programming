@@ -273,4 +273,18 @@ func foo() {
 * 接口规范：[rpc-hello](./code/rpc/hello-refactor/hello/hello.go)
 * 服务器端：[hello-server](./code/rpc/hello-refactro/hello-server.go)
 * 客户端：[hello-client](./code/rpc/hello-refactro/hello-client.go)
-
+### 4.1.3 跨语言的RPC
+* [hello-server](./code/rpc/json/hello-server.go)
+* [hello-client](./code/rpc/json/hello-client.go)
+* 测试Client端发送的数据
+    - 通过`nc -l 1234`启动一个服务监控
+    - `go run hello-client.go`
+    - 可在`nc`窗口看到JSON格式的如下信息
+    > {"method":"HelloService.Hello","params":["user"],"id":0}
+* 测试Server端返回数据
+    - 启动服务器
+    - 在另一个窗口输入如下命令：
+    > echo -e '{"method":"HelloService.Hello","params":["user"],"id":0}' | nc localhost 1234
+    - 返回如下数据：
+    > {"method":"HelloService.Hello","params":["user"],"id":0}
+* 只需要遵循上面的JSON结构，任何语言都可以和Go语言编写的RPC服务通信。
