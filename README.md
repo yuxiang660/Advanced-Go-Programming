@@ -173,3 +173,9 @@ type runtime.Error interface {
 * [Producer-Consumer](./code/pattern/producer-consumer.go)
 ### 1.6.3 发布订阅模型
 * [Publish-Subscribe](./code/pattern/publish-subscribe.go)
+### 1.6.6 素数筛
+* [Prime-Filter](./code/pattern/prime-filter.go)
+![Prime-Filter](./code/pattern/prime-filter.png)<br>
+    - 素数判断标准：一个数不能被小于自己的所有素数整除
+    - 按上图的思路，自然数先过第一个素数2的筛选，选出不可以被2整除的所有数。最小的那个数3就是下一个素数。再给下一个素数3，选出不可以被3整除的所有数。最小的数5就是下一个素数。以此类推。
+    - 利用`chan`可以将各个步骤串起来。例如，被2筛选出来的数，最小的是下一个素数，再将剩下的数传给3。
