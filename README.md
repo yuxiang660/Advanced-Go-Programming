@@ -187,3 +187,49 @@ type runtime.Error interface {
     - 通过`close`一个管道通知所有Goroutine停止
     - 通过`sync.WaitGroup`保证各Goroutine清理工作完成
 * 用`context`控制单个请求的多个Goroutine：[context-quit-goroutine](./code/control-goroutine/select-context-quit.go)
+
+## 1.7 错误和异常
+### 1.7.1 错误处理策略
+* `defer`在出错时关闭文件：[error-defer.go](./code/error/defer.go)
+* 用`recover`捕获所有处理流程中可能产生的异常，然后将异常转为普通的错误返回。
+### 1.7.4 剖析异常
+* 函数用`panic`抛出异常 -> 函数停止执行后续的普通语句 -> 执行之前注册的`defer`语句 -> 返回到调用者
+* 函数用`panic`抛出异常 -> 函数停止执行后续的普通语句 -> 执行之前注册的`defer`语句，并在`defer`中用`recover`捕获异常
+* 在一个函数中用`panic`抛出异常，不能在此函数的非`defer`语句中调用`recover`捕获
+* 如果想在抛出`panic`的函数的`defer`语句中捕获异常成功，必须和有异常的栈帧只隔一个栈帧，例如
+```go
+func foo() {
+    // 无法捕获异样
+    defer recover()
+    panic(1)
+}
+```
+```go
+func foo() {
+    defer func() {
+        // 可以捕获异常
+        if r := recover(); r != nil {...}
+    }（）
+    panic(1)
+}
+```
+```go
+func myRecover() interface{} {
+    return recover()
+}
+func foo() {
+    // 可以捕获异常
+    defer myRecover()
+    panic(1)
+}
+```
+```go
+func foo() {
+    defer func() {
+        // 无法捕获异常
+        if r := myRecover(); r != nil {...}
+    }()
+    panic(1)
+}
+```
+
