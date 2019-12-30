@@ -179,3 +179,11 @@ type runtime.Error interface {
     - 素数判断标准：一个数不能被小于自己的所有素数整除
     - 按上图的思路，自然数先过第一个素数2的筛选，选出不可以被2整除的所有数。最小的那个数3就是下一个素数。再给下一个素数3，选出不可以被3整除的所有数。最小的数5就是下一个素数。以此类推。
     - 利用`chan`可以将各个步骤串起来。例如，被2筛选出来的数，最小的是下一个素数，再将剩下的数传给3。
+### 1.6.7 并发的安全退出
+* `select`处理多个管道的发送或接收操作
+* 当有多个管道均可操作时，`select`会随机选择一个管道（注意，不是从上往下执行）
+* 当没有管道可操作时，如果有`default`分支，会执行`default`分支，否则会一直阻塞
+* 用`select`控制Goroutine退出：[select-quit-goroutine](./code/control-goroutine/select-channel-quit.go)
+    - 通过`close`一个管道通知所有Goroutine停止
+    - 通过`sync.WaitGroup`保证各Goroutine清理工作完成
+* 用`context`控制单个请求的多个Goroutine：[context-quit-goroutine](./code/control-goroutine/select-context-quit.go)

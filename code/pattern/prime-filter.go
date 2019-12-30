@@ -1,23 +1,35 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"context"
+)
 
-func generateNatural() chan int {
+func generateNatural(task context.Context) chan int {
 	ch := make(chan int)
 	go func() {
 		for i := 2; ; i++ {
-			ch <- i
+			select {
+			case <- task.Done():
+				return
+			case ch <- i:
+			}
 		}
 	}()
 	return ch
 }
 
-func primeFilter(in <-chan int, prime int) chan int {
+func primeFilter(task context.Context, in <-chan int, prime int) chan int {
 	out := make(chan int)
 	go func() {
 		for {
-			if i := <-in; i%prime != 0 {
-				out <- i
+			select {
+			case <- task.Done():
+				return
+			case i := <-in:
+				if i % prime != 0 {
+					out <- i
+				}
 			}
 		}
 	}()
@@ -27,12 +39,16 @@ func primeFilter(in <-chan int, prime int) chan int {
 
 func main() {
 	fmt.Println("Prime Filter")
+	
+	task, quit := context.WithCancel(context.Background())
 
-	ch := generateNatural()
+	ch := generateNatural(task)
 	// Find out 100 Prime Number
 	for i := 0; i < 100; i++ {
 		prime := <-ch
 		fmt.Printf("No.%v: %v\n", i+1, prime)
-		ch = primeFilter(ch, prime)
+		ch = primeFilter(task, ch, prime)
 	}
+
+	quit()
 }
