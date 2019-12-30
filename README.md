@@ -254,3 +254,13 @@ func foo() {
     - C函数在`hello.h`中声明，在`hello.go`中定义
     - `main.go`调用cgo生成的C语言版本`SayHello`，最终会通过桥接代码调用Go语言版本的`SayHello`
 
+### 2.2.2 #cgo语句
+* [link-lib](./code/cgo/hello/cpp-class-call/foo.go)
+
+### 2.2.3 build tag 条件编译
+* 可以通过`-tags`命令选择指定文件编译，如`go build -tags debug .`只会编译包含`// +build debug`的源文件。
+
+### 2.5.3 C调用Go函数
+* 将Go代码编译为一个C静态库：
+> go build -buildmode=c=archive -o sum.a main.go
+
