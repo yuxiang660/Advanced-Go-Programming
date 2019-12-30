@@ -1,9 +1,8 @@
 package main
 
-import (
-	"C"
-	"fmt"
-)
+import "C"
+
+import "fmt"
 
 //export SayHello
 func SayHello(s *C.char) {
