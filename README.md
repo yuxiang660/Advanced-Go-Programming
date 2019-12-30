@@ -264,3 +264,13 @@ func foo() {
 * 将Go代码编译为一个C静态库：
 > go build -buildmode=c=archive -o sum.a main.go
 
+# 第4章 RPC和Protobuf
+## RPC入门
+### 4.1.1 RPC版"Hello,World"
+* [hello-server](./code/rpc/hello/hello-server.go)
+* [hello-client](./code/rpc/hello/hello-client.go)
+### 4.1.2 更安全的RPC接口
+* 接口规范：[rpc-hello](./code/rpc/hello-refactor/hello/hello.go)
+* 服务器端：[hello-server](./code/rpc/hello-refactro/hello-server.go)
+* 客户端：[hello-client](./code/rpc/hello-refactro/hello-client.go)
+
