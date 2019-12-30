@@ -136,6 +136,9 @@ type runtime.Error interface {
     RuntimeError()
 }
 ```
+* 接口的类型和内容：[interface-value-type](./code/interface/value-type.go)
+    - 类型：实现此接口的`struct`的类型(`Foo`或者是`Foo`的指针)。
+    - 内容：实现此接口的`struct`的内容。
 
 ## 1.5 面向并发的内存模型
 * 与Erlang不同，Go语言的Goroutine之间是共享内存的
@@ -152,3 +155,21 @@ type runtime.Error interface {
 * 无缓冲的Channel上的发送操作总在对应的接收操作完成前发生：[unbuffered-channel](./code/channel/unbuffered-channel.go)
 * 对于带缓冲的Channel，第K个接收完成操作发生在第K+C个发送完成之前，其中C是Channel的缓存大小。对于从无缓冲Channel进行的接收，发生在对该Channel进行的发送**完成**之前。对于从无缓冲Channel进行的接收**完成**，发生在对该Channel进行的发送完成之后。
 * `select{}`是一个空的管道选择语句，会导致线程阻塞。
+
+## 1.6 常见的并发模式
+> Do not comunicate by sharing memory; instead, shared memory by communicating.<br>
+不要通过共享内存来通信，而应通过通信来共享内存。
+
+* 并发与并行
+    - 并发是程序设计层面，并发的程序运行在单核的计算机上就是顺序执行的。
+    - 并行关注的是程序的运行层面，如GPU中对图像处理会有大量的并行计算。
+### 1.6.1 并发版本的Hello World
+* 并发编程核心：同步通信
+* 同步方式:
+    - `sync.Mutex`：不是递归锁
+    - `chan`(推荐)：等待方接收Channel，执行方发送Channel，以防止带缓冲的Channel影响同步，参见：[sync-tasks.go](./code/channel/sync-tasks.go)
+    - `sync.WaitGroup`: [sync-tasks2.go](./code/channel/sync-tasks2.go)
+### 1.6.2 生产者消费者模型
+* [Producer-Consumer](./code/pattern/producer-consumer.go)
+### 1.6.3 发布订阅模型
+* [Publish-Subscribe](./code/pattern/publish-subscribe.go)

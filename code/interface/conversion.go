@@ -21,7 +21,7 @@ func main() {
 	var closer io.Closer = readCloser
 	fmt.Printf("closer type: %T\n", closer)
 
-	// should use interface explicit conversion because "io.Closer" doesn't include "io.Reader"
+	// Use Type Assertion to access to underlying concrete value
 	var reader2 io.Reader = closer.(io.Reader)
 	fmt.Printf("reader2 type: %T\n", reader2)
 
