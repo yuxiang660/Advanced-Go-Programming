@@ -233,3 +233,21 @@ func foo() {
 }
 ```
 
+# 第2章 CGO编程
+## 2.1 快速入门
+### Hello World
+* 使用Go的`imoport "C"`库：[cgo-hello](./code/cgo/hello/hello.go)
+* 在Go文件中调用C的库函数：[cgo-c-lib-call](./code/cgo/hello/c-lib-call.go)
+* 在Go文件中定义C函数并调用：[cgo-c-call](./code/cgo/hello/c-call.go)
+    - 在注释的C代码和`import "C"`之间不能有空行
+* 在Go文件中声明C函数，在C文件中定义函数：[cgo-extern-c-call](./code/cgo/hello/extern-c-call/hello.go)
+    - C文件和Go文件需要在一个文件夹下
+    - 运行`go run .`而不是`go run xx.go`
+* 在Go文件中声明C++函数，在Cpp文件中定义函数：[cgo-extern-cpp-call](./code/cgo/hello/extern-cpp-call/hello.go)
+    - 需要通过`extern "C"`语句指示该函数的链接符号遵循C语言的规则
+* 在Go文件中使用C++类：[cgo-cpp-class-call](./code/cgo/hello/cpp-class-call/foo.go)
+    - C++类的源文件：`Foo.h`和`Foo.cpp`
+    - 用C包了C++类：`cFoo.h`和`cFoo.cpp`
+    - 上面的四个文件会生成一个静态连接库`libfoo.a`供`foo.go`链接调用
+    - 执行`make`命令，生成`goFoo-with-cpp.out`可执行文件
+
