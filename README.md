@@ -250,4 +250,7 @@ func foo() {
     - 用C包了C++类：`cFoo.h`和`cFoo.cpp`
     - 上面的四个文件会生成一个静态连接库`libfoo.a`供`foo.go`链接调用
     - 执行`make`命令，生成`goFoo-with-cpp.out`可执行文件
+* 用Go重新实现C函数：[cgo-go-to-c](./code/cgo/hello/go-to-c/hello.go)
+    - C函数在`hello.h`中声明，在`hello.go`中定义
+    - `main.go`调用cgo生成的C语言版本`SayHello`，最终会通过桥接代码调用Go语言版本的`SayHello`
 
