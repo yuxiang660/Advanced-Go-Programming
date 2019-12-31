@@ -444,6 +444,9 @@ POST /user/:id
 * httprouter使用的数据结构是**压缩字典树**(Radix Tree)
 * Radix Tree 节点类型：`trees map[string]*node`，其中map的key是RESTful的各种方法。
 
-## 5.3 中间件
-
-
+## 5.7 layout常见大型项目分层
+* 现在比较流行的纯后端API模块一般采用下面的划分方法:
+    1. protocol，处理多种协议，比如处理gRPC或者http等，保证到了Controller层，不需要关心协议的不同。
+    2. Controller，服务入口，负责处理路由，参数校验，请求转发。
+    3. Logic/Service，逻辑（服务）层，一般是业务逻辑的入口。从这里开始，所有请求的参数都是合法的。业务逻辑和业务流程都在这层。
+    4. DAO/Repository，这一层主要负责和数据、存储打交道。负责数据持久化。
