@@ -295,6 +295,15 @@ func foo() {
     > curl localhost:1234/jsonrpc -X POST --data '{"method":"HelloService.Hello","params":["hello"],"id":0}'
     - 会收到如下数据：
     > {"id":0,"result":"hello:hello","error":null}
+### 4.3.3 反向RPC
+* 目的：当内网提供RPC服务，而外网无法访问内网时，可以通过反向RPC解决。首先从内网主动连接到外网的TCP服务器，然后基于这个TCP连接向外网提供RPC服务。
+* [hello-server](./code/rpc/hello-reverse-proxy/hello-server.go)
+    - 服务器不断尝试连接外网的TCP服务
+    - 如果连接成功，将RPC服务连接上外网
+* [hello-client](./code/rpc/hello-reverse-proxy/hello-client.go)
+    - 开启一个TCP服务监听内网服务器的连接
+    - 利用管道通知业务线程连接是否成功
+    - 如果内网服务器连接上，则执行业务逻辑
 
 ## 4.2 Protobuf
 * 利用`Potobuf`编码完成RPC
