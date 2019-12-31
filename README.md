@@ -402,3 +402,48 @@ func foo() {
             4. 启动`publisher`客户端
             > go run publisher-client.go pubsub.pb.go docker
 
+# 第5章 Go和Web
+## 5.1 Web开发简介
+### Hello World入门
+* [echo-web-server](./code/web/hello/echo.go)
+    - 开启Echo服务
+    > go run echo.go
+    - 利用`curl`向服务器发送Post包
+    > curl -d "data1,data2" -X POST http://localhost:8080
+* Web框架种类
+    - 对`httpRouter`进行简单的封装，再提供简单的封装
+    - MVC类框架
+    - 除了数据库schema设计，大部分代码直接生成，如goa
+
+## 5.2 router请求路由
+* 如果开发Web系统对路径中带参数没什么兴趣的话，用`http`标准库中的`mux`就可以。
+* RESTful常见路由请求
+```
+GET /repos/:owner/:repo/comments/:id/reactions
+POST /projects/:project_id/columns
+PUT /user/starred/:owner/:repo
+DELETE /user/starred/:owner/:repo
+```
+下面的地址是`api.github.com`的`started_url`:
+> "starred_url": "https://api.github.com/user/starred{/owner}{/repo}"
+可以看出`/:owner`对应的是`{/owner}`
+
+### 5.2.1 httprouter
+* 路由冲突
+```
+conflict:
+GET /user/info/:name
+GET /user/:id
+
+no conflict:
+GET /user/info/:name
+POST /user/:id
+```
+两个路由拥有一样的http方法和请求路径前缀，且再某个位置出现的A路由是wildcard（指:id这种形式）参数，而B路由则是普通字符串。那么，会在初始化阶段直接panic。
+### 5.2.2 原理
+* httprouter使用的数据结构是**压缩字典树**(Radix Tree)
+* Radix Tree 节点类型：`trees map[string]*node`，其中map的key是RESTful的各种方法。
+
+## 5.3 中间件
+
+
