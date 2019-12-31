@@ -335,3 +335,13 @@ func foo() {
 * [hello-client](./code/grpc/hello/hello/hello-client.go)
     - 利用`hello.pb.go`中的函数，基于一个TCP连接建立`gPRC`的客户端
     - 操作此客户端的RPC函数，得到想要的结果
+
+### 4.4.3 gRPC流
+* gRPC框架针对服务器端和客户端分别提供了流特性，支持双向操作。
+* [hello.proto](./code/grpc/streaming/hello.proto)：在其中一定了一个`Channel`方法，接收客户端参数的流，返回值是返回给客户端的流。
+* [hello-server](./code/grpc/streaming/hello-server.go)，在`Channel`方法中，
+    - 用`Recv()(*String, error)`接收客户端发过来的数据
+    - 用`Send(*String) error`发送数据给客户端
+* [hello-client](./code/grpc/streaming/hello-client.go)
+    - 先调用`Channel`方法得到`stream`对象
+    - 在操作这个`stream`对象，和服务器读写操作
