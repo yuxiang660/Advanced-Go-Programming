@@ -322,3 +322,16 @@ func foo() {
         - 修改`RPC Call`的参数类型
         - 输入下面的命令启动客户端：
         > go run client-server.go hello.pb.go
+
+## 4.4 gRPC入门
+### 4.1.1 gRPC版"Hello,World"
+* [hello.proto](./code/grpc/hello/hello/hello.proto)：在其中不仅定义了一个`message`，也定义`HelloService`接口
+* [hello.pb.go](./code/grpc/hello/hello/hello.pb.go)
+    - 输入下面的命令，自动生成`hello.pb.go`
+    > protoc --go_out=plugins=grpc:. hello.proto
+* [hello-server](./code/grpc/hello/hello/hello-server.go)
+    - 根据`hello.pb.go`中定义的`HelloServiceServer`接口，定义一个`HelloServiceImpl`类型
+    - 新建一个`gRPC`服务，将`HelloServiceImpl`注册进去，启动一个监听，挂载在`gRPC`服务上
+* [hello-client](./code/grpc/hello/hello/hello-client.go)
+    - 利用`hello.pb.go`中的函数，基于一个TCP连接建立`gPRC`的客户端
+    - 操作此客户端的RPC函数，得到想要的结果
