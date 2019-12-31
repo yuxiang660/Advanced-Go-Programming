@@ -295,3 +295,21 @@ func foo() {
     > curl localhost:1234/jsonrpc -X POST --data '{"method":"HelloService.Hello","params":["hello"],"id":0}'
     - 会收到如下数据：
     > {"id":0,"result":"hello:hello","error":null}
+
+## 4.2 Protobuf
+* 利用`Potobuf`编码完成RPC
+    - [hello.proto](./code/protobuf/hello/hello.proto)：创建`Protobuf`的最基本数据单元`message`
+    - [hello.pb.go](./code/protobuf/hello/hello/pb.go)：基于`hello.proto`自动生成的对应的Go代码
+        - 为Go下载`Potobuf`工具（Windows上工作好像有问题）
+        > go get github.com/golang/protobuf/protoc-gen-go
+        - 根据`hello.proto`生成`hello.pb.go`
+        > protoc --go_out=. hello.proto
+        - `hello.pb.go`中定义了了`String`结构体，并且属于`main package`，所以可以直接在`hello-server.go`和`hello-client.go`中使用
+    - [hello-server](./code/protobuf/hello/hello-server.go)
+        - 修改`Hello()`RPC函数的输入输出参数为`String`类型
+        - 输入下面的命令启动服务器：
+        > go run hello-server.go hello.pb.go
+    - [hello-client](./code/protobuf/hello/hello-client.go)
+        - 修改`RPC Call`的参数类型
+        - 输入下面的命令启动客户端：
+        > go run client-server.go hello.pb.go
