@@ -338,10 +338,67 @@ func foo() {
 
 ### 4.4.3 gRPC流
 * gRPC框架针对服务器端和客户端分别提供了流特性，支持双向操作。
+* gRPC流在服务器和客户端之间建立了一个双向通信的管道，两者可以通过这个管道不断进行信息交互。这个通道会一直开着（而不是调一次就关了），这样保证了交互的高效。
 * [hello.proto](./code/grpc/streaming/hello.proto)：在其中一定了一个`Channel`方法，接收客户端参数的流，返回值是返回给客户端的流。
+* [hello.pb.go](./code/grpc/streaming/hello.pb.go)
+    - 这是根据`hello.proto`自动生成的文件
+    - 定义了RPC Server的接口`HelloServiceServer`
+        - Server通过`RegisterHelloServiceServer`注册进所有RPC方法
+    - 定义了RPC Client的接口`HelloServiceClient`
+        - Client通过`NewHelloServiceClient`就可以调用RPC方法了
+        - 不带gRPC流的方法，调用一次，得到返回结果就结束了
+    - 带gRPC流的方法
+        - 定义`HelloService_ChannelClient`接口，这个stream被Client调用
+        - 定义`HelloService_ChannelServer`接口，这个stream被Server调用
+        - Server和Client都会不断操作这个`stream`实现通信
 * [hello-server](./code/grpc/streaming/hello-server.go)，在`Channel`方法中，
     - 用`Recv()(*String, error)`接收客户端发过来的数据
     - 用`Send(*String) error`发送数据给客户端
 * [hello-client](./code/grpc/streaming/hello-client.go)
     - 先调用`Channel`方法得到`stream`对象
     - 在操作这个`stream`对象，和服务器读写操作
+
+### 4.4.4 发布和订阅模式
+* 本地版本的发布订阅模式
+    - 发布者和订阅者不在同一个线程，但属于同一个进程，由Go语言的管道进行通信
+    - 主逻辑`Publisher`类型：[pubsub.go](./code/grpc/publish-subscribe/pubsub/pubsub.go)
+        - `NewPublisher`：传入`timeout`新建一个`Publisher`，`timeout`是`Publish`的最大时常，以防止某个subscriber一直不接收信息。
+        - `Publish`：根据主题，向所有关心此主题的subscribers广播信息。利用带缓冲的管道，保证数据不会丢失。
+        - `SubscribeTopic`：subscriber调用此函数，注册他关心的主题，并得到此管道，用于接收`Publish`来的信息
+    - 主函数`main`: [./code/grpc/publish-subscribe/pubsub-local-not-rpc.go]
+        - 主线程新建一个`Publish`之后，注册入subscribers
+        - 子线程1负责`Publish`信息
+        - 子线程2通过读取subscribers的管道，可以拿到关心的`Publish`信息
+    - 测试命令
+    > go run pubsub-local-not-rpc.go
+* gRPC加Protobuf版本的发布订阅模式
+    - 远程服务器提供RPC方法，本地一台机器作为`Publisher`远程调用服务器的`Publish`RPC方法，本地多台机器作为`Subscriber`远程调用服务器的`Subscribe`RPC方法。这样发布者和订阅者可以分布在不同的机器上，通过网络进行交互。
+    - 远程服务器提供RPC服务：[pubsub-server](./code/grpc/publish-subscribe/pubsub-server.go)
+        - [pubsub.proto](./code/grpc/publish-subscribe/pubsub.proto)定义了两个RPC方法：
+            1. `rpc Publish (String) returns (String)`<br>
+            此RPC方法用于发布者广播信息。发布者广播信息之后就返回了，因此不需要`stream`和服务器保持通信。
+            2. `rpc Subscribe (String) returns (stream String)`<br>
+            此RPC方法用于订阅者接收信息。由于订阅者需要不断从服务器接收关心的信息，所以需要一个读`stream`和服务器保持通信。
+        - [pubsub.pb.go](./code/grpc/publish-subscribe/pubsub.pb.go)
+            根据`pubsub.proto`自动生成的，里面定义了Server和Client的接口，以及一个只读的Stream接口。
+        - [pubsub-server.go](./code/grpc/publish-subscribe/pubsub-server.go)
+            - 根据`pubsub.pb.go`中的Server接口，定义了具体的`PubsubService`类型。
+            - `PubsubService`类型里面包含了一个`pubsub.Publisher`
+            - `Publish`方法就直接调用了`pubsub.Publisher`的`Publish`
+            - `Subscribe`方法不仅调用了`pubsub.SubscribeTopic`，还需要不断地将返回`Chan`的数据`Send`到`PubsubService_SubscribeServer`
+            - 服务器会为每一个调过`Subscribe`的客户端阻塞地往`stream`里填数据
+        - [publisher-client.go](./code/grpc/publish-subscribe/publisher-client.go)
+            - 新建一个gRPC连接，调用`Publish`RPC方法
+        - [subscriber-client.go](./code/grpc/publish-subscribe/subscriber-client.go)
+            - 新建一个gRPC连接，调用`Subscribe`RPC方法，得到一个只读的`stream`
+            - 循环阻塞地读取`stream`中的信息
+        - 用法
+            1. 启动`pubsub`服务器
+            > go run pubsub-server.go pubsub.pb.go
+            2. 启动`subscriber`客户端1，订阅`golang`
+            > go run subsrciber-client.go pubsub.pb.go golang
+            3. 启动`subscriber`客户端2，订阅`docker`
+            > go run subsrciber-client.go pubsub.pb.go docker
+            4. 启动`publisher`客户端
+            > go run publisher-client.go pubsub.pb.go docker
+
