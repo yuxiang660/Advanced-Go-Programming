@@ -285,6 +285,13 @@ func foo() {
     - 启动服务器
     - 在另一个窗口输入如下命令：
     > echo -e '{"method":"HelloService.Hello","params":["user"],"id":0}' | nc localhost 1234
-    - 返回如下数据：
-    > {"method":"HelloService.Hello","params":["user"],"id":0}
+    - 会收到如下数据：
+    > {"id":0,"result":"hello:user","error":null}
 * 只需要遵循上面的JSON结构，任何语言都可以和Go语言编写的RPC服务通信。
+### Http上的RPC
+* [hello-server](./code/rpc/http/hello-server.go)
+    - 启动服务
+    - 在另一个窗口输入如下命令：
+    > curl localhost:1234/jsonrpc -X POST --data '{"method":"HelloService.Hello","params":["hello"],"id":0}'
+    - 会收到如下数据：
+    > {"id":0,"result":"hello:hello","error":null}
